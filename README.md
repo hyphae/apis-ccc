@@ -12,15 +12,15 @@ Here is how to install apis-ccc individually.
 git, maven, groovy and JDK must be installed in advance.
 
 ```bash
-$ git clone https://github.com/SonyCSL/apis-bom.git
+$ git clone https://github.com/hyphae/apis-bom.git
 $ cd apis-bom
 $ mvn install
 $ cd ../
-$ git clone https://github.com/SonyCSL/apis-common.git
+$ git clone https://github.com/hyphae/apis-common.git
 $ cd apis-common
 $ mvn install
 $ cd ../
-$ git cone https://github.com/SonyCSL/apis-ccc.git
+$ git cone https://github.com/hyphae/apis-ccc.git
 $ cd apis-ccc
 $ mvn package
 ```
@@ -59,8 +59,8 @@ Refer to "Chapter 6, Configuration Files" in the [apis-ccc_specification](#ancho
 
 <a id="anchor1"></a>
 ## Documentation
-&emsp;[apis-mian_ccc_specification(EN)](https://github.com/SonyCSL/apis-ccc/blob/main/doc/en/apis-ccc_specification_EN.md)  
-&emsp;[apis-mian_ccc_specification(JP)](https://github.com/SonyCSL/apis-ccc/blob/main/doc/jp/apis-ccc_specification_JP.md)
+&emsp;[apis-mian_ccc_specification(EN)](https://github.com/hyphae/apis-ccc/blob/main/doc/en/apis-ccc_specification_EN.md)  
+&emsp;[apis-mian_ccc_specification(JP)](https://github.com/hyphae/apis-ccc/blob/main/doc/jp/apis-ccc_specification_JP.md)
 
 
 ## API Specification  
@@ -78,8 +78,8 @@ The API specification is created in apis-ccc/target/site/apidocs/.
 
 
 ## License
-&emsp;[Apache License Version 2.0](https://github.com/SonyCSL/apis-ccc/blob/master/LICENSE)
+&emsp;[Apache License Version 2.0](https://github.com/hyphae/apis-ccc/blob/master/LICENSE)
 
 
 ## Notice
-&emsp;[Notice](https://github.com/SonyCSL/apis-ccc/blob/master/NOTICE.md)
+&emsp;[Notice](https://github.com/hyphae/apis-ccc/blob/master/NOTICE.md)
