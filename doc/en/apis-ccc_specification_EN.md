@@ -927,10 +927,6 @@ The OS requirements for IoT boards used with apis-ccc use are described below.
 <td>Operating software</td>
 <td>AdoptOpenJDK (32/64-bit)</td>
 </tr>
-<tr class="odd">
-<td>OSS licensing</td>
-<td>To avoid the effects of copyleft licenses such as GPL, it is prohibited to use an OS that runs software covered by such licenses together with apis-ccc as a single executable file</td>
-</tr>
 <tr class="even">
 <td rowspan="5">Other</td>
 <td>It shall be possible to run apis-ccc automatically when the OS boots.</td>
