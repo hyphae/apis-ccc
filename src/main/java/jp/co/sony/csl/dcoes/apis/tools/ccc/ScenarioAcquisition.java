@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 package jp.co.sony.csl.dcoes.apis.tools.ccc;
 
 import io.vertx.core.AbstractVerticle;
