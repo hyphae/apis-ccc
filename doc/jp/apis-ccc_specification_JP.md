@@ -22,7 +22,7 @@
 - [**6. 設定ファイルについて**](#6-設定ファイルについて)
   - [**6.1. config.json**](#61-configjson)
   - [**6.2. cluster.xml**](#62-clusterxml)
-  - [**6.3. logging.properties**](#63-loggingproperties)
+  - [**6.3. logback.xml**](#63-logbackxml)
   - [**6.4. start.sh**](#64-startsh)
   - [**6.5. stop-kill.sh**](#65-stop-killsh)
   - [**6.6. key.pem**](#66-keypem)
@@ -644,9 +644,9 @@ xml形式のファイルでHazelcastがクラスタを構築する際に必要�
 
 <br>
 
-## **6.3. logging.properties**
+## **6.3. logback.xml**
 
-Javaの標準APIであるjava.util.loggingのLogの出力に関する設定(Logファイルの保存先、Log の保存容量、Log Levelの設定等)が記述されているファイル。
+LogbackのLog出力に関する設定(Logファイルの保存先、Log の保存容量、Log Levelの設定等)が記述されているファイル。
 
 <br>
 
@@ -657,7 +657,7 @@ apis-cccを起動させるスクリプトファイル。OS起動時の自動実�
 
 <br>
 
-> java -Djava.net.preferIPv4Stack=true -Duser.timezone=Asia/Tokyo -Djava.util.logging.config.file=./logging.properties -jar ./apis-ccc-2.23.0-a01-fat.jar -conf ./config.json -cp ./ -cluster -cluster-host 127.0.0.1 &  
+> java -Djava.net.preferIPv4Stack=true -Duser.timezone=Asia/Tokyo -Dlogback.configurationFile=./logback.xml -jar ./apis-ccc-2.23.0-a01-fat.jar -conf ./config.json -cp ./ -cluster -cluster-host 127.0.0.1 &  
 
 <br>
 
@@ -668,8 +668,8 @@ apis-cccを起動させるスクリプトファイル。OS起動時の自動実�
 * Duser.timezone=Asia/Tokyo  
  → Timezone設定。
 
-* Djava.util.logging.config.file=./logging.properties  
- → Log構成ファイルを指定するオプション。
+* Dlogback.configurationFile=./logback.xml  
+ → Logback構成ファイルを指定するオプション。
 
 * jar ./apis-ccc-2.23.0-a01-fat.jar  
  → JARファイルの中にカプセル化されたプログラムの実行を指定するオプション。
@@ -708,11 +708,11 @@ Event BusのSSL化に使われる証明書である。
     
 ## **7.1. Log Level**
 
-Log出力にはJava標準APIのjava.util.loggingを使っており以下の7つのLevelに分類されている。APISとしては”CONFIG”, “FINER”のLevelは使用しない。これらのAPISの動作Logはlogging.propertiesファイルに記載することでLogファイルの保存先、保存するLog Level、最大Logサイズ、最大保存Log数等の設定を行っている。
+Log出力にはSLF4J/Logbackを使っており以下の7つのLevelに分類されている。APISとしては”CONFIG”, “FINER”のLevelは使用しない。これらのAPISの動作Logはlogback.xmlファイルに記載することでLogファイルの保存先、保存するLog Level、最大Logサイズ、最大保存Log数等の設定を行っている。
 
 <br>
 
-\[java.util.logging Log Level\]
+\[APIS Log Level\]
 
 1. SEVERE  
   * 実行中にErrorが発生した場合に使われるLevelである。  
@@ -745,7 +745,7 @@ Log出力にはJava標準APIのjava.util.loggingを使っており以下の7つ�
 
 ## **7.2. APIS動作Log出力先**
 
-apis-cccの動作LogはUDP、Console、ファイルの3つの出力先がある。logging.propertiesの設定でそれぞれの出力の有無や前頁で述べた出力Levelの制限をかけることができる。UDPはコミュニケーションラインに出力されるため情報漏洩や通信のトラフィックを考慮して設定し、ファイルへの出力は不揮発性メモリの容量を考慮して設定する。
+apis-cccの動作LogはUDP、Console、ファイルの3つの出力先がある。logback.xmlの設定でそれぞれの出力の有無や前頁で述べた出力Levelの制限をかけることができる。UDPはコミュニケーションラインに出力されるため情報漏洩や通信のトラフィックを考慮して設定し、ファイルへの出力は不揮発性メモリの容量を考慮して設定する。
 
 ![](media/media/image8.png)
 
