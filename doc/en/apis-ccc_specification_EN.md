@@ -746,41 +746,35 @@ This is the certificate used for SSL protection of the event bus.
     
 ## **7.1.Log Level**
 
-SLF4J with Logback is used for logging. Of the seven available log levels described below, the “CONFIG” and “FINER” levels are not used for APIS. The APIS operation logs are described in the logback.xml file, where the log file location, log levels, maximum log size, and maximum number of logs are set.
+SLF4J with Logback is used for logging. APIS uses the native Logback levels ERROR, WARN, INFO, DEBUG, and TRACE. The APIS operation logs are described in the logback.xml file, where the log file location, log levels, maximum log size, and maximum number of logs are set.
 
 \[APIS Log Level\]
 
-1.  SEVERE
+1. ERROR
   * This level is used when an execution error occurs.  
    Log output at this level can be considered an indication that a problem has occurred.  
      * \< Example \> 
-       * Communication with an external server has failed.
+        * Communication with an external server has failed.
 
-2.  WARNING
-  *  This level is used to issue a warning when there is unexpected behavior that is not an execution error.  
-     *  \< Example \> 
-        *  The hardware data on each node in the response from the Grid Master is empty.
+2. WARN
+  * This level is used to issue a warning when there is unexpected behavior that is not an execution error.  
+     * \< Example \> 
+        * The hardware data on each node in the response from the Grid Master is empty.
 
-3.  INFO
-  *  This level is used to output information during normal execution. For apis-ccc, it is used when event processing that is particularly important to operation is performed.
-     *  \< Example \> 
-        *  Connection information for a server or other external service
+3. INFO
+  * This level is used to output information during normal execution. For apis-ccc, it is used when event processing that is particularly important to operation is performed.
+     * \< Example \> 
+        * Connection information for a server or other external service
 
-4.  CONFIG
-  *  This level relates to configuration settings, but is not output for apis-ccc.
+4. DEBUG
+  * This level is used for output of ordinary operation information during normal system operation.
+     * \< Example \> 
+        * Information to be sent to a server or other external services
 
-6.  FINE
-  *  This level is used for output of ordinary operation information during normal system operation.
-     *  \< Example \> 
-        *  Information to be sent to a server or other external services
-
-6.  FINER
-  *  This level is for information related to the starting and stopping of specific processes, but is not output for apis-ccc.
-
-8.  FINEST
-  *   This level is used for output of ordinary operation information during normal system operation.
-      *   \< Example \> 
-          *   When Vert.x Verticle is started up, etc.
+5. TRACE
+  * This level is used for detailed lifecycle or tracing information, but is not used for apis-ccc.
+      * \< Example \> 
+          * When Vert.x Verticle is started up, etc.
 
 <br>
 
