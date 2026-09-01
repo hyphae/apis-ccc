@@ -8,8 +8,8 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jp.co.sony.csl.dcoes.apis.common.util.StringUtil;
 import jp.co.sony.csl.dcoes.apis.common.util.vertx.VertxConfig;
 import jp.co.sony.csl.dcoes.apis.tools.ccc.PolicyAcquisition;
@@ -61,10 +61,10 @@ public class HttpPostPolicyAcquisitionImpl implements PolicyAcquisition.Impl {
 		Integer port = (isSsl) ? VertxConfig.config.getInteger(443, "policyAcquisition", "port") : VertxConfig.config.getInteger(80, "policyAcquisition", "port");
 		Boolean sslTrustAll = VertxConfig.config.getBoolean(false, "policyAcquisition", "sslTrustAll");
 		uri_ = VertxConfig.config.getString("policyAcquisition", "uri");
-		if (log.isInfoEnabled()) log.info("host : " + host);
-		if (log.isInfoEnabled()) log.info("port : " + port);
-		if (isSsl) if (log.isInfoEnabled()) log.info("sslTrustAll : " + sslTrustAll);
-		if (log.isInfoEnabled()) log.info("uri : " + uri_);
+		if (log.isInfoEnabled()) log.info("host : {}", host);
+		if (log.isInfoEnabled()) log.info("port : {}", port);
+		if (isSsl) if (log.isInfoEnabled()) log.info("sslTrustAll : {}", sslTrustAll);
+		if (log.isInfoEnabled()) log.info("uri : {}", uri_);
 		client_ = vertx_.createHttpClient(new HttpClientOptions().setDefaultHost(host).setDefaultPort(port).setSsl(isSsl).setTrustAll(sslTrustAll));
 	}
 
@@ -79,7 +79,7 @@ public class HttpPostPolicyAcquisitionImpl implements PolicyAcquisition.Impl {
 		body.appendString("&clusterId=").appendString(StringUtil.urlEncode(VertxConfig.clusterId()));
 		body.appendString("&unitId=").appendString(StringUtil.urlEncode(unitId));
 		body.appendString("&isMD5Password=true");
-		if (log.isDebugEnabled()) log.debug("body : " + body);
+		if (log.isDebugEnabled()) log.debug("body : {}", body);
 		new Poster_(body).execute_(completionHandler);
 	}
 
@@ -105,53 +105,73 @@ public class HttpPostPolicyAcquisitionImpl implements PolicyAcquisition.Impl {
 					completed_ = true;
 					completionHandler.handle(r);
 				} else {
-					if (log.isWarnEnabled()) log.warn("post_() result returned more than once : " + r);
+					if (log.isWarnEnabled()) log.warn("post_() result returned more than once : {}", r);
 				}
 			});
 		}
-		/**
- 		* NOTE: The method {@code HttpClient.post(String, Handler<HttpClientResponse>)} used below is deprecated
- 		* in newer versions of Vert.x. However, this project currently targets Vert.x 3.5.3, where this method is
- 		* the supported and appropriate way to perform simple HTTP POST requests.
- 		*
- 		* It is acceptable to continue using this method for now because:
- 		* - The newer, preferred API ({@code request(HttpMethod, ...)} or {@code WebClient}) was introduced in later
- 		*   Vert.x versions (3.6+ for request-based API, 3.5.4+ for WebClient).
- 		* - Upgrading Vert.x is not feasible at this time due to compatibility constraints across the project.
- 		*
- 		* Refactoring to the modern API should be planned once the project is upgraded to a newer Vert.x version
- 		* (3.6+ or 4.x) to ensure forward compatibility and eliminate deprecation warnings.
- 		*/
-		@SuppressWarnings("deprecation")
+
 		private void post_(Handler<AsyncResult<JsonObject>> completionHandler) {
-			Long requestTimeoutMsec = VertxConfig.config.getLong(DEFAULT_REQUEST_TIMEOUT_MSEC, "policyAcquisition", "requestTimeoutMsec");
-			client_.post(uri_, resPost -> {
-				if (log.isDebugEnabled()) log.debug("status : " + resPost.statusCode());
-				if (resPost.statusCode() == 200) {
-					resPost.bodyHandler(buffer -> {
-						String resp = String.valueOf(buffer);
-						if (0 < resp.length()) {
-							JsonObject result = new JsonObject(resp);
-							if (log.isDebugEnabled()) log.debug("result : " + result);
-							completionHandler.handle(Future.succeededFuture(result));
-						} else {
-							if (log.isDebugEnabled()) log.debug("result : null");
-							completionHandler.handle(Future.succeededFuture());
-						}
-					}).exceptionHandler(t -> {
-						completionHandler.handle(Future.failedFuture(t));
-					});
-				} else {
-					resPost.bodyHandler(error -> {
-						completionHandler.handle(Future.failedFuture("http post failed : " + resPost.statusCode() + " : " + resPost.statusMessage() + " : " + error));
-					}).exceptionHandler(t -> {
-						completionHandler.handle(Future.failedFuture("http post failed : " + resPost.statusCode() + " : " + resPost.statusMessage() + " : " + t));
-					});
-				}
-			}).setTimeout(requestTimeoutMsec).exceptionHandler(t -> {
-				completionHandler.handle(Future.failedFuture(t));
-			}).putHeader("content-type", "application/x-www-form-urlencoded").putHeader("content-length", String.valueOf(body_.length())).write(body_).end();
-		}
+            Long requestTimeoutMsec = VertxConfig.config.getLong(DEFAULT_REQUEST_TIMEOUT_MSEC, "policyAcquisition", "requestTimeoutMsec");
+            
+            // 1. Initiate the asynchronous request
+            client_.request(io.vertx.core.http.HttpMethod.POST, uri_).onComplete(reqResult -> {
+                if (reqResult.failed()) {
+                    completionHandler.handle(Future.failedFuture(reqResult.cause()));
+                    return;
+                }
+
+                io.vertx.core.http.HttpClientRequest req = reqResult.result();
+
+                // Configure request properties
+                req.setTimeout(requestTimeoutMsec);
+                req.putHeader("content-type", "application/x-www-form-urlencoded");
+                req.putHeader("content-length", String.valueOf(body_.length()));
+
+                // Handle network/connection exceptions
+                req.exceptionHandler(t -> {
+                    completionHandler.handle(Future.failedFuture(t));
+                });
+
+                // 2. Send the body and capture the response
+                req.send(body_, resPostResult -> {
+                    if (resPostResult.failed()) {
+                        completionHandler.handle(Future.failedFuture(resPostResult.cause()));
+                        return;
+                    }
+
+                    io.vertx.core.http.HttpClientResponse resPost = resPostResult.result();
+
+                    if (log.isDebugEnabled()) log.debug("status : {}", resPost.statusCode());
+
+                    if (resPost.statusCode() == 200) {
+                        resPost.bodyHandler(buffer -> {
+                            String resp = String.valueOf(buffer);
+                            if (0 < resp.length()) {
+                                try {
+                                    JsonObject result = new JsonObject(resp);
+                                    if (log.isDebugEnabled()) log.debug("result : {}", result);
+                                    completionHandler.handle(Future.succeededFuture(result));
+                                } catch (Exception e) {
+                                    // Safeguard for JSON parsing issues
+                                    completionHandler.handle(Future.failedFuture(e));
+                                }
+                            } else {
+                                if (log.isDebugEnabled()) log.debug("result : null");
+                                completionHandler.handle(Future.succeededFuture());
+                            }
+                        }).exceptionHandler(t -> {
+                            completionHandler.handle(Future.failedFuture(t));
+                        });
+                    } else {
+                        resPost.bodyHandler(error -> {
+                            completionHandler.handle(Future.failedFuture("http post failed : " + resPost.statusCode() + " : " + resPost.statusMessage() + " : " + error));
+                        }).exceptionHandler(t -> {
+                            completionHandler.handle(Future.failedFuture("http post failed : " + resPost.statusCode() + " : " + resPost.statusMessage() + " : " + t));
+                        });
+                    }
+                });
+            });
+        }
 	}
 
 }

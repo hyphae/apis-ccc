@@ -2,11 +2,11 @@ package jp.co.sony.csl.dcoes.apis.tools.ccc;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jp.co.sony.csl.dcoes.apis.common.ServiceAddress;
 import jp.co.sony.csl.dcoes.apis.common.util.vertx.JsonObjectUtil;
 import jp.co.sony.csl.dcoes.apis.common.util.vertx.VertxConfig;
@@ -59,17 +59,17 @@ public class UnitDataReporting extends AbstractVerticle {
 	 * - {@code CONFIG.unitDataReporting.type}
 	 * Prepares the object to be implemented.
 	 * Starts the timer.
-	 * @param startFuture {@inheritDoc}
+	 * @param startPromise {@inheritDoc}
 	 * @throws Exception {@inheritDoc}
 	 * CONFIG から設定を取得し初期化する.
 	 * - {@code CONFIG.unitDataReporting.enabled}
 	 * - {@code CONFIG.unitDataReporting.type}
 	 * 実装オブジェクトを用意する.
 	 * タイマを起動する.
-	 * @param startFuture {@inheritDoc}
+	 * @param startPromise {@inheritDoc}
 	 * @throws Exception {@inheritDoc}
 	 */
-	@Override public void start(Future<Void> startFuture) throws Exception {
+	@Override public void start(Promise<Void> startPromise) throws Exception {
 		enabled_ = VertxConfig.config.getBoolean(Boolean.TRUE, "unitDataReporting", "enabled");
 		if (enabled_) {
 			if (log.isInfoEnabled()) log.info("unitDataReporting enabled");
@@ -84,11 +84,11 @@ public class UnitDataReporting extends AbstractVerticle {
 					break;
 				}
 				if (impl_ == null) {
-					startFuture.fail("unknown CONFIG.unitDataReporting.type value : " + type);
+					startPromise.fail("unknown CONFIG.unitDataReporting.type value : " + type);
 					return;
 				}
 			} catch (Exception e) {
-				startFuture.fail(e);
+				startPromise.fail(e);
 				return;
 			}
 		} else {
@@ -96,8 +96,8 @@ public class UnitDataReporting extends AbstractVerticle {
 		}
 
 		if (enabled_) unitDataReportingTimerHandler_(0L);
-		if (log.isTraceEnabled()) log.trace("started : " + deploymentID());
-		startFuture.complete();
+		if (log.isTraceEnabled()) log.trace("started : {}", deploymentID());
+		startPromise.complete();
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class UnitDataReporting extends AbstractVerticle {
 	 */
 	@Override public void stop() throws Exception {
 		stopped_ = true;
-		if (log.isTraceEnabled()) log.trace("stopped : " + deploymentID());
+		if (log.isTraceEnabled()) log.trace("stopped : {}", deploymentID());
 	}
 
 	////
@@ -145,11 +145,11 @@ public class UnitDataReporting extends AbstractVerticle {
 			return;
 		}
 		if (log.isInfoEnabled()) log.info("reporting unit data ...");
-		vertx.eventBus().<JsonObject>send(ServiceAddress.GridMaster.unitDatas(), null, rep -> {
+		vertx.eventBus().<JsonObject>request(ServiceAddress.GridMaster.unitDatas(), null, rep -> {
 			if (rep.succeeded()) {
 				JsonObject result = rep.result().body();
 				if (result != null) {
-					if (log.isInfoEnabled()) log.info("size of unit data : " + result.size());
+					if (log.isInfoEnabled()) log.info("size of unit data : {}", result.size());
 					if (!result.isEmpty()) {
 						// Ensures that the element is a JsonObject
 						// 要素が JsonObject であることを保証する
@@ -159,17 +159,17 @@ public class UnitDataReporting extends AbstractVerticle {
 							if (aVal instanceof JsonObject) {
 								filtered.put(aKey, aVal);
 							} else {
-								if (log.isWarnEnabled()) log.warn("invalid unitData item : " + aVal);
+								if (log.isWarnEnabled()) log.warn("invalid unitData item : {}", aVal);
 							}
 						}
 						result = filtered;
-						if (log.isInfoEnabled()) log.info("size of filtered unit data : " + result.size());
+						if (log.isInfoEnabled()) log.info("size of filtered unit data : {}", result.size());
 					}
 					if (!result.isEmpty()) {
 						// Adds data unit ID
 						// データセット ID を追加する
 						long id = System.currentTimeMillis();
-						if (log.isDebugEnabled()) log.debug("datasetId : " + id);
+						if (log.isDebugEnabled()) log.debug("datasetId : {}", id);
 						for (String aKey : result.fieldNames()) {
 							JsonObject aVal = result.getJsonObject(aKey);
 							aVal.put("datasetId", id);
@@ -178,7 +178,7 @@ public class UnitDataReporting extends AbstractVerticle {
 							if (resReport.succeeded()) {
 								// nop
 							} else {
-								log.error("Communication failed with ServiceCenter ; " + resReport.cause());
+								log.error("Communication failed with ServiceCenter", resReport.cause());
 							}
 							setUnitDataReportingTimer_();
 						});
@@ -191,7 +191,7 @@ public class UnitDataReporting extends AbstractVerticle {
 					setUnitDataReportingTimer_();
 				}
 			} else {
-				log.error("Communication failed on EventBus ; " + rep.cause());
+				log.error("Communication failed on EventBus", rep.cause());
 				setUnitDataReportingTimer_();
 			}
 		});

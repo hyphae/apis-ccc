@@ -21,7 +21,7 @@
 - [**6. Configuration Files**](#6-configuration-files)
   - [**6.1. config.json**](#61-configjson)
   - [**6.2. cluster.xml**](#62-clusterxml)
-  - [**6.3. logging.properties**](#63-loggingproperties)
+  - [**6.3. logback.xml**](#63-logbackxml)
   - [**6.4. start.sh**](#64-startsh)
   - [**6.5. stop-kill.sh**](#65-stop-killsh)
   - [**6.6. key.pem**](#66-keypem)
@@ -680,9 +680,9 @@ The file is encrypted for storage as cluster.xml.encrypted.
 
 <br>
 
-## **6.3. logging.properties**
+## **6.3. logback.xml**
 
-This file contains settings that are related to log output of the standard java.util.logging API (log file location, log capacity, logging level, etc.).
+This file contains settings that are related to log output of the Logback backend (log file location, log capacity, logging level, etc.).
 
 <br>
 
@@ -693,7 +693,7 @@ The command in start.sh that starts up apis-ccc is shown below.
 
 <br>
 
- > java -Djava.net.preferIPv4Stack=true -Duser.timezone=Asia/Tokyo -Djava.util.logging.config.file=./logging.properties -jar ./apis-ccc-2.23.0-a01-fat.jar -conf ./config.json -cp ./ -cluster -cluster-host 127.0.0.1 &  
+ > java -Djava.net.preferIPv4Stack=true -Duser.timezone=Asia/Tokyo -Dlogback.configurationFile=./logback.xml -jar ./apis-ccc-2.23.0-a01-fat.jar -conf ./config.json -cp ./ -cluster -cluster-host 127.0.0.1 &  
 
 <br>
 
@@ -705,8 +705,8 @@ The arguments that follow ‘java’ in the command are explained below.
 * Duser.timezone=Asia/Tokyo  
  \-\> Time zone setting
 
-* Djava.util.logging.config.file=./logging.properties  
- \-\> Option for specifying the log configuration file
+* Dlogback.configurationFile=./logback.xml  
+ \-\> Option for specifying the Logback configuration file
 
 * jar ./apis-ccc-2.23.0-a01-fat.jar  
  \-\> Option for specifying execution of the program encapsulated in a JAR file
@@ -746,47 +746,41 @@ This is the certificate used for SSL protection of the event bus.
     
 ## **7.1.Log Level**
 
-The standard Java java.util.logging API is used for logging. Of the seven available log levels described below, the “CONFIG” and “FINER” levels are not used for APIS. The APIS operation logs are described in the logging.properties file, where the log file location, log levels, maximum log size, and maximum number of logs are set.
+SLF4J with Logback is used for logging. APIS uses the native Logback levels ERROR, WARN, INFO, DEBUG, and TRACE. The APIS operation logs are described in the logback.xml file, where the log file location, log levels, maximum log size, and maximum number of logs are set.
 
-\[java.util.logging Log Level\]
+\[APIS Log Level\]
 
-1.  SEVERE
+1. ERROR
   * This level is used when an execution error occurs.  
    Log output at this level can be considered an indication that a problem has occurred.  
      * \< Example \> 
-       * Communication with an external server has failed.
+        * Communication with an external server has failed.
 
-2.  WARNING
-  *  This level is used to issue a warning when there is unexpected behavior that is not an execution error.  
-     *  \< Example \> 
-        *  The hardware data on each node in the response from the Grid Master is empty.
+2. WARN
+  * This level is used to issue a warning when there is unexpected behavior that is not an execution error.  
+     * \< Example \> 
+        * The hardware data on each node in the response from the Grid Master is empty.
 
-3.  INFO
-  *  This level is used to output information during normal execution. For apis-ccc, it is used when event processing that is particularly important to operation is performed.
-     *  \< Example \> 
-        *  Connection information for a server or other external service
+3. INFO
+  * This level is used to output information during normal execution. For apis-ccc, it is used when event processing that is particularly important to operation is performed.
+     * \< Example \> 
+        * Connection information for a server or other external service
 
-4.  CONFIG
-  *  This level relates to configuration settings, but is not output for apis-ccc.
+4. DEBUG
+  * This level is used for output of ordinary operation information during normal system operation.
+     * \< Example \> 
+        * Information to be sent to a server or other external services
 
-6.  FINE
-  *  This level is used for output of ordinary operation information during normal system operation.
-     *  \< Example \> 
-        *  Information to be sent to a server or other external services
-
-6.  FINER
-  *  This level is for information related to the starting and stopping of specific processes, but is not output for apis-ccc.
-
-8.  FINEST
-  *   This level is used for output of ordinary operation information during normal system operation.
-      *   \< Example \> 
-          *   When Vert.x Verticle is started up, etc.
+5. TRACE
+  * This level is used for detailed lifecycle or tracing information, but is not used for apis-ccc.
+      * \< Example \> 
+          * When Vert.x Verticle is started up, etc.
 
 <br>
 
 ## **7.2. Output Destinations of APIS Action Logs**
 
-The apis-ccc operation logs are output to three destinations: UDP, console, and file. The log output destinations and output levels can be set in the logging.properties file. UDP is used for security of data output to the communication line and line traffic. Output to file should be considered for the capacity of non-volatile storage.
+The apis-ccc operation logs are output to three destinations: UDP, console, and file. The log output destinations and output levels can be set in the logback.xml file. UDP is used for security of data output to the communication line and line traffic. Output to file should be considered for the capacity of non-volatile storage.
 
 ![](media/media/image8.png)
 

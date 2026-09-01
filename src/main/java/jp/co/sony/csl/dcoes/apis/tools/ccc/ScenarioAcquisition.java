@@ -2,11 +2,11 @@ package jp.co.sony.csl.dcoes.apis.tools.ccc;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jp.co.sony.csl.dcoes.apis.common.ServiceAddress;
 import jp.co.sony.csl.dcoes.apis.common.util.vertx.VertxConfig;
 import jp.co.sony.csl.dcoes.apis.tools.ccc.impl.http_post.HttpPostScenarioAcquisitionImpl;
@@ -36,17 +36,17 @@ public class ScenarioAcquisition extends AbstractVerticle {
 	 * - {@code CONFIG.scenarioAcquisition.enabled}
 	 * Prepares the object to be implemented.
 	 * Starts {@link io.vertx.core.eventbus.EventBus} service. 
-	 * @param startFuture {@inheritDoc}
+	 * @param startPromise {@inheritDoc}
 	 * @throws Exception {@inheritDoc}
 	 * 起動時に呼び出される.
 	 * CONFIG から設定を取得し初期化する.
 	 * - {@code CONFIG.scenarioAcquisition.enabled}
 	 * 実装オブジェクトを用意する.
 	 * {@link io.vertx.core.eventbus.EventBus} サービスを起動する.
-	 * @param startFuture {@inheritDoc}
+	 * @param startPromise {@inheritDoc}
 	 * @throws Exception {@inheritDoc}
 	 */
-	@Override public void start(Future<Void> startFuture) throws Exception {
+	@Override public void start(Promise<Void> startPromise) throws Exception {
 		enabled_ = VertxConfig.config.getBoolean(Boolean.TRUE, "scenarioAcquisition", "enabled");
 		if (enabled_) {
 			if (log.isInfoEnabled()) log.info("scenarioAcquisition enabled");
@@ -57,10 +57,10 @@ public class ScenarioAcquisition extends AbstractVerticle {
 
 		startScenarioService_(resScenario -> {
 			if (resScenario.succeeded()) {
-				if (log.isTraceEnabled()) log.trace("started : " + deploymentID());
-				startFuture.complete();
+				if (log.isTraceEnabled()) log.trace("started : {}", deploymentID());
+				startPromise.complete();
 			} else {
-				startFuture.fail(resScenario.cause());
+				startPromise.fail(resScenario.cause());
 			}
 		});
 	}
@@ -72,7 +72,7 @@ public class ScenarioAcquisition extends AbstractVerticle {
 	 * @throws Exception {@inheritDoc}
 	 */
 	@Override public void stop() throws Exception {
-		if (log.isTraceEnabled()) log.trace("stopped : " + deploymentID());
+		if (log.isTraceEnabled()) log.trace("stopped : {}", deploymentID());
 	}
 
 	////
@@ -116,7 +116,7 @@ public class ScenarioAcquisition extends AbstractVerticle {
 						JsonObject result = resAcquire.result();
 						req.reply(result);
 					} else {
-						log.error("Communication failed with ServiceCenter ; " + resAcquire.cause());
+						log.error("Communication failed with ServiceCenter", resAcquire.cause());
 						req.fail(-1, resAcquire.cause().getMessage());
 					}
 				});

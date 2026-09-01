@@ -8,8 +8,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.mongo.UpdateOptions;
@@ -82,12 +82,12 @@ public class MongoDBDealReportingImpl implements DealReporting.Impl {
 		if (ssl) config.put("trustAll", sslTrustAll);
 		client_ = MongoClient.createShared(vertx, config);
 		collection_ = VertxConfig.config.getString("dealReporting", "collection");
-		if (log.isInfoEnabled()) log.info("host : " + host);
-		if (log.isInfoEnabled()) log.info("port : " + port);
-		if (log.isInfoEnabled()) log.info("ssl : " + ssl);
-		if (ssl) if (log.isInfoEnabled()) log.info("sslTrustAll : " + sslTrustAll);
-		if (log.isInfoEnabled()) log.info("database : " + database);
-		if (log.isInfoEnabled()) log.info("collection : " + collection_);
+		if (log.isInfoEnabled()) log.info("host : {}", host);
+		if (log.isInfoEnabled()) log.info("port : {}", port);
+		if (log.isInfoEnabled()) log.info("ssl : {}", ssl);
+		if (ssl) if (log.isInfoEnabled()) log.info("sslTrustAll : {}", sslTrustAll);
+		if (log.isInfoEnabled()) log.info("database : {}", database);
+		if (log.isInfoEnabled()) log.info("collection : {}", collection_);
 	}
 
 	/**
@@ -125,12 +125,12 @@ public class MongoDBDealReportingImpl implements DealReporting.Impl {
 			JsonObject query = new JsonObject().put("dealId", dealId);
 			client_.findOneAndReplaceWithOptions(collection_, query, deal, FIND_OPTIONS_, UPDATE_OPTIONS_, res -> {
 				if (res.succeeded()) {
-//					if (log.isDebugEnabled()) log.debug("findOneAndReplaceWithOptions succeeded : " + res.result());
+//					if (log.isDebugEnabled()) log.debug("findOneAndReplaceWithOptions succeeded : {}", res.result());
 					completionHandler.handle(Future.succeededFuture());
 				} else {
-					log.error("Communication failed with MongoDB ; " + res.cause());
-					log.error("query : " + query);
-					log.error("deal : " + deal);
+					log.error("Communication failed with MongoDB", res.cause());
+					log.error("query : {}", query);
+					log.error("deal : {}", deal);
 					completionHandler.handle(Future.failedFuture(res.cause()));
 				}
 			});

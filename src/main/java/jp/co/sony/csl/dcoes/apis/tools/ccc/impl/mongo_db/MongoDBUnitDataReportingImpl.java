@@ -9,8 +9,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.vertx.ext.mongo.MongoClient;
 import jp.co.sony.csl.dcoes.apis.common.util.DateTimeUtil;
 import jp.co.sony.csl.dcoes.apis.common.util.vertx.JsonObjectUtil;
@@ -80,12 +80,12 @@ public class MongoDBUnitDataReportingImpl implements UnitDataReporting.Impl {
 		if (ssl) config.put("trustAll", sslTrustAll);
 		client_ = MongoClient.createShared(vertx, config);
 		collection_ = VertxConfig.config.getString("unitDataReporting", "collection");
-		if (log.isInfoEnabled()) log.info("host : " + host);
-		if (log.isInfoEnabled()) log.info("port : " + port);
-		if (log.isInfoEnabled()) log.info("ssl : " + ssl);
-		if (ssl) if (log.isInfoEnabled()) log.info("sslTrustAll : " + sslTrustAll);
-		if (log.isInfoEnabled()) log.info("database : " + database);
-		if (log.isInfoEnabled()) log.info("collection : " + collection_);
+		if (log.isInfoEnabled()) log.info("host : {}", host);
+		if (log.isInfoEnabled()) log.info("port : {}", port);
+		if (log.isInfoEnabled()) log.info("ssl : {}", ssl);
+		if (ssl) if (log.isInfoEnabled()) log.info("sslTrustAll : {}", sslTrustAll);
+		if (log.isInfoEnabled()) log.info("database : {}", database);
+		if (log.isInfoEnabled()) log.info("collection : {}", collection_);
 	}
 
 	/**
@@ -113,11 +113,11 @@ public class MongoDBUnitDataReportingImpl implements UnitDataReporting.Impl {
 		convertDateTimeField_(data);
 		client_.insert(collection_, data, res -> {
 			if (res.succeeded()) {
-//				if (log.isDebugEnabled()) log.debug("insert succeeded : " + res.result());
+//				if (log.isDebugEnabled()) log.debug("insert succeeded : {}", res.result());
 				completionHandler.handle(Future.succeededFuture());
 			} else {
-				log.error("Communication failed with MongoDB ; " + res.cause());
-				log.error("unitData : " + data);
+				log.error("Communication failed with MongoDB", res.cause());
+				log.error("unitData : {}", data);
 				completionHandler.handle(Future.failedFuture(res.cause()));
 			}
 		});
