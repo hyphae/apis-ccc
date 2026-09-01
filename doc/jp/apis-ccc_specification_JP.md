@@ -708,37 +708,31 @@ Event BusのSSL化に使われる証明書である。
     
 ## **7.1. Log Level**
 
-Log出力にはSLF4J/Logbackを使っており以下の7つのLevelに分類されている。APISとしては”CONFIG”, “FINER”のLevelは使用しない。これらのAPISの動作Logはlogback.xmlファイルに記載することでLogファイルの保存先、保存するLog Level、最大Logサイズ、最大保存Log数等の設定を行っている。
+Log出力にはSLF4J/Logbackを使っており、APISではLogbackの標準Levelである ERROR, WARN, INFO, DEBUG, TRACE を使う。これらのAPISの動作Logはlogback.xmlファイルに記載することでLogファイルの保存先、保存するLog Level、最大Logサイズ、最大保存Log数等の設定を行っている。
 
 <br>
 
 \[APIS Log Level\]
 
-1. SEVERE  
+1. ERROR  
   * 実行中にErrorが発生した場合に使われるLevelである。  
   このLevelのLogが出力された場合には何等かの不具合が発生したと考えられる。
      * \<例\> サーバ等の外部Serviceとの通信が失敗した場合。
 
-2. WARNING  
+2. WARN  
   * 実行中にErrorではないが期待された動作でないため警告として知らせる目的で使われるLevelである。
     * \<例\> Grid Masterから取得した各ノードのハードウェア情報等が空の場合。
 
-3.  INFO
+3. INFO
   * 実行中の正常系の情報を出力する際に用いられるLevelで、apis-cccでは特に動作として重要なイベント処理を行った際に使われる。  
     * \<例\> サーバ等の外部Serviceとの接続情報
 
-4. CONFIG  
-  * 設定に関するLog Levelであるがapis-cccとしてはこのLevelの出力は行わない。
-
-6. FINE  
+4. DEBUG  
   * 実行中の正常系の通常動作情報を出力する際に用いられるLevelである。
     * \<例\>サーバ等の外部Serviceに通知する情報
 
-6. FINER
+5. TRACE
   * 特定の処理についての開始及び終了の情報であるがapis-cccとしてはこのLevelの出力は行わない。
-
-7. FINEST  
-  * 実行中の正常系の通常動作情報を出力する際に用いられるLevelである。
     * \<例\> Vert.xのVerticle起動時等。
 
 <br>
